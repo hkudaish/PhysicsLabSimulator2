@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المختبر الافتراضي — نموذج أولي</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app" class="lab-chem">
+  <div id="tabs"><button data-lab="chem" class="on" aria-label="فتح معمل الكيمياء" aria-controls="panel">🧪 معمل الكيمياء</button><button data-lab="circuit" aria-label="فتح معمل الدارات" aria-controls="panel">⚡ معمل الدارات</button><button id="sndBtn" style="flex:0 0 auto" aria-label="تبديل الصوت">🔊 الصوت</button><button id="qBtn" style="flex:0 0 auto" aria-label="تغيير جودة المحاكاة">الجودة: عالية</button></div>
+  <div id="c">
+    <div id="hud">
+      <div class="chip ec">التيار الكلي<b id="rdI">0 A</b></div>
+      <div class="chip ec">جهد المصباح<b id="rdVb">0 V</b></div>
+      <div class="chip ec">قدرة المصباح<b id="rdP">0 W</b></div>
+      <div class="chip ec">الحالة<b id="rdState" style="direction:rtl">—</b></div>
+      <div class="chip cc">pH الكأس<b id="rdPh">7.0</b></div>
+      <div class="chip ec"><span id="vcLbl">جهد المكثف</span><b id="rdVc">0 V</b></div>
+      <div class="chip cc">السحّاحة<b id="rdBur">0.00 mL</b></div>
+      <div class="chip cc">حرارة الكأس<b id="rdT">25 °C</b></div>
+    </div>
+    <div id="alerts"></div>
+  <div id="toolsbar"></div>
+  <div id="partsbar"><button data-act="undo">↶<i>تراجع</i></button><button data-act="redo">↷<i>إعادة</i></button><button data-act="delsel">🗑<i>حذف المحدد</i></button><span class="pbt">القطع</span><button data-p="battery">🔋<i>بطارية</i></button><button data-p="resistor">▭<i>مقاومة</i></button><button data-p="bulb">💡<i>مصباح</i></button><button data-p="cap">⏛<i>مكثف</i></button><button data-p="ind">➰<i>ملف</i></button><button data-p="switch">⎍<i>مفتاح</i></button><button data-p="led">◍<i>LED</i></button><button data-p="diode">▷|<i>ثنائي</i></button><button data-p="relay">⎔<i>ترحيل</i></button><button data-p="sig">∿<i>مولّد</i></button><button data-p="npn">⟟<i>ترانزستور</i></button><button data-p="and">&amp;<i>AND</i></button><button data-p="or">≥1<i>OR</i></button><button data-p="not">¬<i>NOT</i></button><button data-p="nand">⊼<i>NAND</i></button><button data-p="nor">⊽<i>NOR</i></button><button data-p="xor">⊕<i>XOR</i></button><button data-p="wire">〰<i>سلك</i></button></div>
+  <div id="shelfbar"><div class="srow"><button id="shPrev">◀</button><input id="shSlider" type="range" min="0" max="1000" value="0"><button id="shNext">▶</button></div><div class="srow" style="direction:rtl"><div id="shInfo" style="flex:1;font-size:13px"></div><button id="shDrop" class="pri" style="flex:0 0 auto;padding:8px 12px">إسقاط في الكأس</button></div></div>
+  <div id="toolbar"><button id="tNext">◀</button><div id="tInfo"><b id="tName"></b><span id="tDesc"></span></div><button id="tPrev">▶</button></div>
+  <canvas id="scope" width="440" height="200"></canvas>
+  <div id="log" style="opacity:0">أسقط عنصرًا من الجدول الدوري في الكأس.</div>
+  </div>
+  <div id="panel">
+    <div class="row ec nbd"><label for="vSlider">جهد البطارية <span id="vOut"></span></label><input id="vSlider" type="range" min="1" max="12" step="0.5" value="6" aria-label="جهد البطارية"></div>
+    <div class="row ec nbd" style="grid-column:1/-1"><label>المفتاح والمصباح (قطع/توصيل التيار)</label><div class="btns"><button id="swBtn" class="on">⏻ المفتاح: تشغيل</button><button id="bulbBtn" class="on">💡 المصباح: مركّب</button></div></div>
+    <div class="row ec nbd"><label for="rSlider">المقاومة R1 <span id="rOut"></span></label><input id="rSlider" type="range" min="1" max="100" step="1" value="12" aria-label="المقاومة R1"></div>
+    <div class="row hl ec"><label for="lSlider">الحثّ L <span id="lOut"></span></label><input id="lSlider" type="range" min="0.5" max="10" step="0.5" value="2" aria-label="الحث L"></div>
+    <div class="row hc ec"><label for="cSlider">السعة C</label><div class="btns"><span id="cOut" style="flex:0 0 auto"></span></div><input id="cSlider" type="range" min="0.05" max="1" step="0.05" value="0.25" aria-label="السعة C"></div>
+    <div class="row rc ec"><label>المفتاح <span id="tau" style="color:#93a0b8"></span></label><div class="btns"><button data-sw="charge" class="on">شحن</button><button data-sw="discharge">تفريغ</button></div></div>
+    <div class="row bd ec" style="grid-column:1/-1"><label>القطع: اختر ثم المس نقطة على الطاولة (تلتصق الأطراف تلقائيًا)</label><div class="btns wrap"><button data-part="battery">🔋 بطارية</button><button data-part="resistor">مقاومة</button><button data-part="bulb">💡 مصباح</button><button data-part="cap">مكثف</button><button data-part="ind">ملف</button><button data-part="switch">مفتاح</button><button data-part="led">LED</button><button data-part="diode">ثنائي</button><button data-part="relay">ترحيل</button><button data-part="sig">مولّد إشارة</button><button data-part="npn">ترانزستور</button><button data-part="and">AND</button><button data-part="or">OR</button><button data-part="not">NOT</button><button data-part="nand">NAND</button><button data-part="nor">NOR</button><button data-part="xor">XOR</button></div></div>
+    <div class="row bd ec" style="grid-column:1/-1"><label>الأدوات</label><div class="btns wrap"><button data-tool="sel" class="on">تحديد</button><button data-tool="wire">سلك</button><button data-tool="move">نقل</button><button data-tool="probe">قياس</button><button data-tool="del">حذف</button><button id="rotBtn">⟳ تدوير</button><button id="undoBtn">↶ تراجع</button><button id="redoBtn">↷ إعادة</button></div></div>
+    <div class="row bd ec" style="grid-column:1/-1"><label>قيمة القطعة <span id="valOut" style="color:#93a0b8">اختر قطعة</span></label><input id="valSlider" type="range" min="1" max="10" step="1" value="1" disabled></div>
+    <div class="row bd ec" style="grid-column:1/-1"><label>قوالب جاهزة</label><div class="btns wrap"><button data-tpl="series">توالٍ</button><button data-tpl="parallel">توازٍ</button><button data-tpl="rc">RC + مفتاح</button><button data-tpl="led">LED + مقاومة</button><button data-tpl="npn">ترانزستور كمفتاح</button><button data-tpl="osc">مذبذب (وميض LED)</button><button data-tpl="filter">فلتر RC + مولّد</button><button data-tpl="and">AND</button><button data-tpl="or">OR</button><button data-tpl="not">NOT</button><button id="clearB">مسح الكل</button><button id="bReset">إصلاح التالف</button></div></div>
+    <div class="row ec" style="grid-column:1/-1"><label>طريقة التوصيل</label><div class="btns"><button data-mode="series" class="on">توالٍ</button><button data-mode="parallel">توازٍ</button><button data-mode="rc">RC</button><button data-mode="rl">RL</button><button data-mode="rlc">RLC</button><button data-mode="build">🛠 بناء</button></div></div>
+    <div class="row cc"><label>سائل الكأس</label><div class="btns"><button data-liq="acid">حمض HCl</button><button data-liq="neutral">ماء</button><button data-liq="base">قاعدة NaOH</button></div></div>
+    <div class="row" style="grid-column:1/-1"><label for="lightSlider">شدة الإضاءة <span id="lightOut">100%</span></label><input id="lightSlider" type="range" min="0.15" max="2" step="0.05" value="1" aria-label="شدة الإضاءة"></div>
+    <div class="row" style="grid-column:1/-1"><label>المنظور</label><div class="btns"><button data-view="bench" class="on">الطاولة</button><button data-view="shelf">الرف</button><button data-view="room">الغرفة</button><button data-view="top" class="cc">من الأعلى</button></div></div>
+    <div class="row cc"><label>كاشف (للمعايرة والترسيب)</label><div class="btns"><select id="reagent"><option value="HCl">HCl حمض</option><option value="NaOH">NaOH قاعدة</option><option value="H2SO4">H₂SO₄ حمض</option><option value="AgNO3">AgNO₃</option><option value="NaCl">NaCl</option><option value="BaCl2">BaCl₂</option><option value="CuSO4">CuSO₄</option><option value="FeCl3">FeCl₃</option><option value="KI">KI</option><option value="PbNO3">Pb(NO₃)₂</option></select><button data-dose="0.01">+0.01 mol</button><button data-dose="0.05">+0.05 mol</button></div></div>
+    <div class="row cc"><label for="massSlider">كتلة العينة على الميزان <span id="massOut"></span></label><input id="massSlider" type="range" min="0.05" max="20" step="0.05" value="1" aria-label="كتلة العينة"></div>
+    <div class="row" style="grid-column:1/-1"><label for="volSlider">الأصوات (اختيارية) <span id="volOut" style="color:#93a0b8"></span></label><input id="volSlider" type="range" min="0" max="100" step="5" value="80" aria-label="مستوى الصوت"><div class="btns wrap"><button data-snd="chem" class="on" aria-label="تفعيل صوت الكيمياء">♨ الكيمياء</button><button data-snd="circuit" class="on" aria-label="تفعيل نقرات الدارات">⚡ نقرات الدارات</button><button data-snd="hum" class="on" aria-label="تفعيل طنين المحوّل">〰 طنين المحوّل</button><button data-snd="scope" class="on" aria-label="تفعيل نبضات الأوسيلوسكوب">📟 نبضات الأوسيلوسكوب</button><button data-snd="alerts" class="on" aria-label="تفعيل أصوات التنبيهات">🔔 التنبيهات</button></div></div>
+    <div class="row" style="grid-column:1/-1"><button id="explainBtn" class="pri">💡 ماذا يحدث الآن؟</button></div>
+    <div class="row cc"><label>التسخين والمعايرة</label><div class="btns"><button id="heatBtn">🔥 إشعال اللهب</button><button id="tapBtn">فتح الصنبور</button><button id="dropOne">قطرة</button></div></div>
+    <div class="row cc" style="grid-column:1/-1"><label for="flameSlider">قوة اللهب (درجة التسخين) <span id="flameOut" style="color:#93a0b8"></span></label><input id="flameSlider" type="range" min="10" max="100" step="5" value="60" aria-label="قوة اللهب"></div>
+    <div class="row cc" style="grid-column:1/-1"><div class="btns"><button id="airBtn" class="on">فتحة الهواء: مفتوحة (لهب أحمر ناري حارّ)</button></div></div>
+    <div class="row cc"><label>السحّاحة: <span id="burV" style="color:#93a0b8"></span></label><div class="btns"><button id="indBtn">فينول فثالين: إيقاف</button><button id="refillBtn">تعبئة السحّاحة</button></div></div>
+    <div class="row cc"><label>الكيمياء</label><div class="btns"><button id="openPt" class="pri">الجدول الدوري</button><button id="resetBk">إعادة الكأس</button></div></div>
+    <button id="reset">استبدال المصباح المحترق</button>
+    <small class="ec">المصباح 6V/3W. ارفع الجهد أو قلّل المقاومة حتى يحترق. اسحب للدوران، وبإصبعين للتقريب. السهم الأزرق = اتجاه التيار الاصطلاحي (من القطب +).</small>
+  </div>
+</div>
+<div id="ptable"><div class="pbar"><b>الجدول الدوري</b><button id="closePt">إغلاق ✕</button></div>
+  <div id="info"></div>
+  <div class="btns" style="padding:0 12px 8px"><button id="dropBtn" class="pri">إسقاط في الكأس ⬇</button></div>
+  <div id="pwrap"><div id="pgrid"></div></div>
+  <div class="legend"><span class="el alkali"></span>قلوي<span class="el alkearth"></span>قلوي ترابي<span class="el trans"></span>انتقالي<span class="el post"></span>ما بعد الانتقالي<span class="el metalloid"></span>شبه فلز<span class="el nonmetal"></span>لا فلز<span class="el halogen"></span>هالوجين<span class="el noble"></span>نبيل<span class="el lanth"></span>لانثانيد<span class="el actin"></span>أكتينيد</div>
+</div>
+  <!-- Virtual Lab Modular Scripts -->
+  <script src="js/app-state.js"></script>
+  <script src="js/app-runtime.js"></script>
+  <script src="js/app-history.js"></script>
+  <script src="js/lab-orchestrator.js"></script>
+  <script src="js/sim/chemistry.js"></script>
+  <script src="js/sim/circuits.js"></script>
+  <script src="js/sim/engine.js"></script>
+  <script src="js/ui/guide.js"></script>
+  <script src="js/core-lab.js"></script>
+  <script src="js/titration-graph.js"></script>
+  <script src="js/circuit-enhancements.js"></script>
+  <script src="js/experiments.js"></script>
+  <script src="js/ux-improvements.js"></script>
+</body>
+</html>
