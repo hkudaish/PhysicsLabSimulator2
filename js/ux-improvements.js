@@ -2,7 +2,7 @@
   const safeStorage = {
     get(key, fallback) {
       try {
-        const value = localStorage.getItem(key);
+        const value = sessionStorage.getItem(key);
         return value === null ? fallback : value;
       } catch (error) {
         return fallback;
@@ -10,21 +10,43 @@
     },
     set(key, value) {
       try {
-        localStorage.setItem(key, value);
+        sessionStorage.setItem(key, value);
       } catch (error) {
         // Ignore storage failures in private/strict browsing.
       }
     }
   };
 
+  const setGuideVisibility = (guide, visible) => {
+    if (!guide) return;
+    const toggle = document.getElementById('labGuideToggle');
+    guide.classList.toggle('hidden', !visible);
+    if (toggle) {
+      toggle.hidden = visible;
+      toggle.setAttribute('aria-expanded', String(visible));
+    }
+    safeStorage.set('lab_guide_hidden', visible ? '0' : '1');
+  };
+
   const applyGuide = () => {
     const hud = document.getElementById('hud');
     if (!hud || document.getElementById('labGuide')) return;
+
+    const toggle = document.createElement('button');
+    toggle.id = 'labGuideToggle';
+    toggle.className = 'lab-guide-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-label', 'إظهار المساعدة السريعة');
+    toggle.setAttribute('aria-controls', 'labGuide');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = '💡';
+    toggle.hidden = true;
 
     const guide = document.createElement('div');
     guide.id = 'labGuide';
     guide.className = 'lab-guide';
     guide.setAttribute('role', 'note');
+    guide.setAttribute('aria-label', 'المساعدة السريعة');
     guide.innerHTML = `
       <div class="lab-guide-header">
         <span>💡 مساعدة سريعة</span>
@@ -38,10 +60,11 @@
 
     const close = guide.querySelector('.lab-guide-close');
     close.addEventListener('click', () => {
-      guide.classList.add('hidden');
-      safeStorage.set('lab_guide_hidden', '1');
+      setGuideVisibility(guide, false);
     });
+    toggle.addEventListener('click', () => setGuideVisibility(guide, true));
 
+    hud.appendChild(toggle);
     hud.appendChild(guide);
     return guide;
   };
@@ -53,7 +76,6 @@
     const body = guide.querySelector('#labGuideText');
     if (head) head.textContent = title;
     if (body) body.textContent = text;
-    guide.classList.remove('hidden');
   };
 
   const bindKeyboardShortcuts = () => {
@@ -73,7 +95,7 @@
         event.preventDefault();
         const guide = document.getElementById('labGuide');
         if (guide) {
-          guide.classList.toggle('hidden');
+          setGuideVisibility(guide, guide.classList.contains('hidden'));
         }
       }
     });
@@ -120,10 +142,11 @@
     if (!guide) return;
 
     if (seen === '1') {
-      guide.classList.add('hidden');
+      setGuideVisibility(guide, false);
       return;
     }
 
+    setGuideVisibility(guide, true);
     setGuideTip('ابدأ بخطوة صغيرة', 'اختر سائل الكأس، ثم استخدم السحّاحة أو شغّل المفتاح في وضع التوالي.');
 
     window.setTimeout(() => {
